@@ -27,7 +27,7 @@ describe OysterCard do
   it 'knows when it is on a journey' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
     subject.touch_in(station)
-    expect(subject.in_use).to eq true
+    expect(subject.in_journey?).to eq true
   end
 
   it 'won\'t let user travel without minimum balance' do
@@ -36,7 +36,7 @@ describe OysterCard do
 
   it 'deducts balance on touch out' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
-    allow(subject).to receive(:in_use) {true}
+    allow(subject).to receive(:entry_station) {station}
     expect{ subject.touch_out }.to change{ subject.balance }.by(-OysterCard::MINIMUM_BALANCE)
   end
 
@@ -44,6 +44,13 @@ describe OysterCard do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
     subject.touch_in(station)
     expect(subject.entry_station).to eq station
+  end 
+
+  it 'can forget entry station on touch out' do
+    subject.top_up(OysterCard::MINIMUM_BALANCE)
+    subject.touch_in(station)
+    subject.touch_out
+    expect(subject.entry_station).to eq nil
   end 
 
 end
