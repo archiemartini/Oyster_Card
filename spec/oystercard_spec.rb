@@ -29,7 +29,12 @@ describe OysterCard do
   end
 
   it 'knows when it is on a journey' do
+    subject.top_up(OysterCard::MINIMUM_BALANCE)
     subject.touch_in
     expect(subject.in_journey?).to eq true
   end
+
+  it 'won\'t let user travel without minimum balance' do
+    expect { subject.touch_in }.to raise_error "Insufficient funds, balance must be at least £#{OysterCard::MINIMUM_BALANCE}"
+  end 
 end
