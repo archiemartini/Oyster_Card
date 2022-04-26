@@ -1,7 +1,9 @@
 require 'oystercard'
 describe OysterCard do
- let(:station) { double :station } 
-  
+ let(:entry_station) { double :entry_station }
+ let(:exit_station) { double :exit_station }
+
+
   it 'can display initial balance of 0' do
     expect(subject.balance).to eq 0
   end
@@ -26,31 +28,42 @@ describe OysterCard do
 
   it 'knows when it is on a journey' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
-    subject.touch_in(station)
+    subject.touch_in(entry_station)
     expect(subject.in_journey?).to eq true
   end
 
   it 'won\'t let user travel without minimum balance' do
-    expect { subject.touch_in(station) }.to raise_error "Insufficient funds, balance must be at least £#{OysterCard::MINIMUM_BALANCE}"
+    expect { subject.touch_in(entry_station) }.to raise_error "Insufficient funds, balance must be at least £#{OysterCard::MINIMUM_BALANCE}"
   end
 
   it 'deducts balance on touch out' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
     allow(subject).to receive(:entry_station) {station}
-    expect{ subject.touch_out }.to change{ subject.balance }.by(-OysterCard::MINIMUM_BALANCE)
+    expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-OysterCard::MINIMUM_BALANCE)
   end
 
   it 'records entry station of current journey' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
-    subject.touch_in(station)
-    expect(subject.entry_station).to eq station
-  end 
+    subject.touch_in(entry_station)
+    expect(subject.entry_station).to eq entry_station
+  end
 
   it 'can forget entry station on touch out' do
     subject.top_up(OysterCard::MINIMUM_BALANCE)
-    subject.touch_in(station)
-    subject.touch_out
+    subject.touch_in(entry_station)
+    subject.touch_out(exit_station)
     expect(subject.entry_station).to eq nil
-  end 
+  end
+
+  it 'can remember a journey' do
+    subject.top_up(OysterCard::MINIMUM_BALANCE)
+    subject.touch_in(entry_station)
+    subject.touch_out(exit_station)
+    expect(subject.journey_history).to eq [{entry_station: entry_station, exit_station: exit_station}]
+  end
+
+  it 'new Oyster has no journey history' do
+    expect(subject.journey_history).to eq []
+  end
 
 end
