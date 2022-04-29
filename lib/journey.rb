@@ -24,3 +24,4 @@ class Journey
 
 
 end
+
